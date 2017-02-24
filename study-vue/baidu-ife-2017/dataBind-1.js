@@ -23,16 +23,16 @@ Observer.prototype.defineAllData = function(obj) {
 /**
  * 修改属性加get、set，监听其属性的读取与变化
  */
-Object.prototype.defineGetSet = function(key, val) {
+Observer.prototype.defineGetSet = function(key, val) {
   Object.defineProperty(this.data, key, {
     enumerable: true,
     configurable: true,
     get: function() {
-      console.log('你访问了' + key);
+      console.log('你访问了', key);
       return val;
     },
     set: function(newVal) {
-      console.log('你设置了' + key + ',新的值为' + newVal);
+      console.log('你设置了', key, ',新的值为', newVal);
       if (newVal !== val) {
         val = newVal;
       }
@@ -57,6 +57,6 @@ let app2 = new Observer({
 
 // 要实现的结果如下：
 app1.data.name // 你访问了 name
-app1.data.age = 100;  // 你设置了 age，新的值为100
+app1.data.age = 100; // 你设置了 age，新的值为100
 app2.data.university // 你访问了 university
-app2.data.major = 'science'  // 你设置了 major，新的值为 science
+app2.data.major = 'science' // 你设置了 major，新的值为 science
