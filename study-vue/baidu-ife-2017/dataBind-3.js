@@ -38,12 +38,12 @@ Observer.prototype.defineGetSet = function(key, val, events) {
       console.log('你设置了', key, ',新的值为', newVal);
       if (newVal !== val) {
         val = newVal;
-        self.$emit(key, newVal); //触发当前key事件
         var parent = self.parent;
         while(parent) { // 循环寻找上级触发事件
           self.$emit(parent, newVal);
           parent = parent.parent;
         }
+        self.$emit(key, newVal); //触发当前key事件
       }
       Observer.tempArr = [];
       if (typeof newVal === 'object') { //这个key是obj，递归，往key加get、set
@@ -99,6 +99,9 @@ app2.$watch('name', function(newName) {
 });
 app2.$watch('firstName', function(newName) {
   console.log('名字变了。')
+});
+app2.$watch('lastName', function(newName) {
+  console.log('姓氏变了。')
 });
 app2.data.name.firstName = 'hahaha';
 // 输出：我的姓名发生了变化，可能是姓氏变了，也可能是名字变了。
