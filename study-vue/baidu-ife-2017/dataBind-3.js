@@ -37,6 +37,7 @@ Observer.prototype.defineGetSet = function(key, val) {
       console.log('你设置了', key, ',新的值为', newVal);
       if (newVal !== val) {
         val = newVal;
+        //console.log(self.events)
         self.$emit(key, newVal);
       }
       if (typeof newVal === 'object') { //这个key是obj，递归，往key加get、set
@@ -54,6 +55,12 @@ Observer.prototype.$watch = function(key, listener) {
     this.events[key] = [];
   }
   this.events[key].push(listener);
+  if (typeof this.data[key] === 'object') {
+    for (var i in this.data[key]) {
+      console.log(i,'!!!!')
+      this.$watch(i, listener);
+    }
+  }
 }
 
 /**
@@ -75,30 +82,20 @@ Observer.prototype.$emit = function() {
  * 代码测试
  */
 
-let app1 = new Observer({
-  name: 'youngwind',
-  age: 25
-});
-
-app1.data.name = {
-  lastName: 'liang',
-  firstName: 'shaofeng'
-};
-
-app1.data.name.lastName;
-// 这里还需要输出 '你访问了 lastName '
-app1.data.name.firstName = 'lalala';
-// 这里还需要输出 '你设置了firstName, 新的值为 lalala'
-
-
 let app2 = new Observer({
-  name: 'youngwind',
+  name: {
+    firstName: 'shaofeng',
+    lastName: 'liang'
+  },
   age: 25
 });
 
-// 你需要实现 $watch 这个 API
-app2.$watch('age', function(age) {
-  console.log(`我的年纪变了，现在已经是：${age}岁了`)
+app2.$watch('name', function(newName) {
+  console.log('我的姓名发生了变化，可能是姓氏变了，也可能是名字变了。')
 });
 
-app2.data.age = 100; // 输出：'我的年纪变了，现在已经是100岁了'*/
+app2.data.name.firstName = 'hahaha';
+// 输出：我的姓名发生了变化，可能是姓氏变了，也可能是名字变了。
+app2.data.name.lastName = 'blablabla';
+// 输出：我的姓名发生了变化，可能是姓氏变了，也可能是名字变了。
+

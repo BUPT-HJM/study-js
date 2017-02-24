@@ -13,7 +13,7 @@ Observer.prototype.defineAllData = function(obj) {
   for (var key in obj) {
     if (obj.hasOwnProperty(key)) { //可枚举属性
       if (typeof obj[key] === 'object') { //这个key是obj，递归，往key加get、set
-        return new Observer(obj[key]);
+        new Observer(obj[key]);
       }
       this.defineGetSet(key, obj[key]); //对该obj的key加set、set
     }
