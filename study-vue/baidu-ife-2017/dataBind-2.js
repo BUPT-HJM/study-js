@@ -3,6 +3,7 @@
  */
 function Observer(data) {
   this.data = data; //存下当前data
+  this.events = {}; //存下所有事件
   this.defineAllData(data);
 }
 
@@ -24,6 +25,7 @@ Observer.prototype.defineAllData = function(obj) {
  * 修改属性加get、set，监听其属性的读取与变化
  */
 Observer.prototype.defineGetSet = function(key, val) {
+  var self = this;
   Object.defineProperty(this.data, key, {
     enumerable: true,
     configurable: true,
@@ -35,6 +37,7 @@ Observer.prototype.defineGetSet = function(key, val) {
       console.log('你设置了', key, ',新的值为', newVal);
       if (newVal !== val) {
         val = newVal;
+        self.$emit(key, newVal);
       }
       if (typeof newVal === 'object') { //这个key是obj，递归，往key加get、set
         return new Observer(newVal);
@@ -44,29 +47,24 @@ Observer.prototype.defineGetSet = function(key, val) {
 }
 
 
-
-/**
- *
- */
-function EventEmitter() {
-  this.events = {}
-}
-
-EventEmitter.prototype.on = function(event, listener) {
-  if (!this.events[event]) {
-    this.events[event] = [];
+Observer.prototype.$watch = function(key, listener) {
+  if (!this.events[key]) {
+    this.events[key] = [];
   }
-  this.events[event].push(listener);
+  this.events[key].push(listener);
 }
 
-EventEmitter.prototype.emit = function(event, data) {
-  if (!this.events[event] || this.events[event].length < 1) {
+Observer.prototype.$emit = function() {
+  var key = [].shift.call(arguments);
+  var data = [].slice.call(arguments);
+  if (!this.events[key] || this.events[key].length < 1) {
     return;
   }
-  this.events[event].forEach(function(listener) {
+  this.events[key].forEach(function(listener) {
     listener(data || {});
   })
 }
+
 
 /**
  * 代码测试
@@ -88,17 +86,14 @@ app1.data.name.firstName = 'lalala';
 // 这里还需要输出 '你设置了firstName, 新的值为 lalala'
 
 
+let app2 = new Observer({
+  name: 'youngwind',
+  age: 25
+});
 
+// 你需要实现 $watch 这个 API
+app2.$watch('age', function(age) {
+  console.log(`我的年纪变了，现在已经是：${age}岁了`)
+});
 
-/*
- let app1 = new Observer({
-         name: 'youngwind',
-         age: 25
- });
-
- // 你需要实现 $watch 这个 API
- app1.$watch('age', function(age) {
-         console.log(`我的年纪变了，现在已经是：${age}岁了`)
- });
-
- app1.data.age = 100; // 输出：'我的年纪变了，现在已经是100岁了'*/
+app2.data.age = 100; // 输出：'我的年纪变了，现在已经是100岁了'*/
