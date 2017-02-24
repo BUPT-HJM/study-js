@@ -1,30 +1,30 @@
 /**
  * Observer 观察data,监听其属性的读取与变化
  */
-function Observer(data) {
+function Observer(data, events) {
   this.data = data; //存下当前data
-  this.events = {}; //存下所有事件
-  this.defineAllData(data);
+  this.events = events || {}; //存下所有事件
+  this.defineAllData(data, this.events);
 }
+
 
 /**
  * 递归修改属性
  */
-Observer.prototype.defineAllData = function(obj) {
-  for (var key in obj) {
-    if (obj.hasOwnProperty(key)) { //可枚举属性
-      if (typeof obj[key] === 'object') { //这个key是obj，递归，往key加get、set
-        new Observer(obj[key]);
+Observer.prototype.defineAllData = function(obj, events) {
+    for (var key in obj) {
+      if (obj.hasOwnProperty(key)) { //可枚举属性
+        if (typeof obj[key] === 'object') { //这个key是obj，递归，往key加get、set
+          new Observer(obj[key], events);
+        }
+        this.defineGetSet(key, obj[key], events); //对该obj的key加set、set
       }
-      this.defineGetSet(key, obj[key]); //对该obj的key加set、set
     }
   }
-}
-
-/**
- * 修改属性加get、set，监听其属性的读取与变化
- */
-Observer.prototype.defineGetSet = function(key, val) {
+  /**
+   * 修改属性加get、set，监听其属性的读取与变化
+   */
+Observer.prototype.defineGetSet = function(key, val, events) {
   var self = this;
   Object.defineProperty(this.data, key, {
     enumerable: true,
@@ -39,8 +39,9 @@ Observer.prototype.defineGetSet = function(key, val) {
         val = newVal;
         self.$emit(key, newVal);
       }
+      Observer.tempArr = [];
       if (typeof newVal === 'object') { //这个key是obj，递归，往key加get、set
-        return new Observer(newVal);
+        return new Observer(newVal, events);
       }
     }
   })
