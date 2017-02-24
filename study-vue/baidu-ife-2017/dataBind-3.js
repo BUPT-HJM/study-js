@@ -1,9 +1,10 @@
 /**
  * Observer 观察data,监听其属性的读取与变化
  */
-function Observer(data, events) {
+function Observer(data, events, parent) {
   this.data = data; //存下当前data
   this.events = events || {}; //存下所有事件
+  this.parent = parent; // 如果深层，存下上一级的key
   this.defineAllData(data, this.events);
 }
 
@@ -15,7 +16,7 @@ Observer.prototype.defineAllData = function(obj, events) {
   for (var key in obj) {
     if (obj.hasOwnProperty(key)) { //可枚举属性
       if (typeof obj[key] === 'object') { //这个key是obj，递归，往key加get、set
-        new Observer(obj[key], events);
+        new Observer(obj[key], events, key);
       }
       this.defineGetSet(key, obj[key], events); //对该obj的key加set、set
     }
@@ -26,27 +27,27 @@ Observer.prototype.defineAllData = function(obj, events) {
  */
 Observer.prototype.defineGetSet = function(key, val, events) {
   var self = this;
-  Observer.tempArr = [];  //声明一个全局变量，以便事件传播
   Object.defineProperty(this.data, key, {
     enumerable: true,
     configurable: true,
     get: function() {
-      Observer.tempArr.push(key)
       console.log('你访问了', key);
       return val;
     },
     set: function(newVal) {
-      Observer.tempArr.push(key)
       console.log('你设置了', key, ',新的值为', newVal);
       if (newVal !== val) {
         val = newVal;
-        Observer.tempArr.forEach(function(item) { //遍历临时数组触发事件
-          self.$emit(item, newVal);
-        })
+        self.$emit(key, newVal); //触发当前key事件
+        var parent = self.parent;
+        while(parent) { // 循环寻找上级触发事件
+          self.$emit(parent, newVal);
+          parent = parent.parent;
+        }
       }
       Observer.tempArr = [];
       if (typeof newVal === 'object') { //这个key是obj，递归，往key加get、set
-        return new Observer(newVal, events);
+        return new Observer(newVal, events, key);
       }
     }
   })
@@ -88,10 +89,7 @@ Observer.prototype.$emit = function() {
 let app2 = new Observer({
   name: {
     firstName: 'shaofeng',
-    lastName: 'liang',
-    a: {
-      b: 'b'
-    }
+    lastName: 'liang'
   },
   age: 25
 });
@@ -106,4 +104,3 @@ app2.data.name.firstName = 'hahaha';
 // 输出：我的姓名发生了变化，可能是姓氏变了，也可能是名字变了。
 app2.data.name.lastName = 'blablabla';
 // 输出：我的姓名发生了变化，可能是姓氏变了，也可能是名字变了。
-app2.data.name.a.b = 'blablabla';
