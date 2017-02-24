@@ -46,7 +46,9 @@ Observer.prototype.defineGetSet = function(key, val) {
   })
 }
 
-
+/**
+ * watch key放入事件数组
+ */
 Observer.prototype.$watch = function(key, listener) {
   if (!this.events[key]) {
     this.events[key] = [];
@@ -54,6 +56,9 @@ Observer.prototype.$watch = function(key, listener) {
   this.events[key].push(listener);
 }
 
+/**
+ * emit 触发事件
+ */
 Observer.prototype.$emit = function() {
   var key = [].shift.call(arguments);
   var data = [].slice.call(arguments);
