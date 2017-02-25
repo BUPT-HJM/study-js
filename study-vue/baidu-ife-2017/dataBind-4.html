@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+
+<body>
+  <!-- 页面中原本的 html 模板片段 -->
+  <div id="app">
+    <p>姓名：{{user.name}}</p>
+    <p>年龄：{{user.age}}</p>
+  </div>
+  <script>
+  function findAllNode(node, vm) {
+    for (var i = 0; i < node.children.length; i++) {
+      var thisNode = node.children[i];
+      if (thisNode.children.length) {
+        findAllNode(thisNode, vm)
+      } else {
+        compile(thisNode, vm)
+      }
+    }
+  }
+
+  function compile(node, vm) {
+    var reg = /\{\{(.*)\}\}/g;
+    if (reg.test(node.innerText)) {
+      var keyArr = RegExp.$1.split(".");
+      var data = vm.data;
+      keyArr.forEach(function(key) {
+        data = data[key];
+      })
+      node.innerText = data;
+    }
+  }
+
+  function Vue(options) {
+    this.data = options.data;
+    this.el = options.el;
+    findAllNode(document.querySelector(this.el), this)
+  }
+  var app = new Vue({
+    el: '#app',
+    data: {
+      user: {
+        name: 'hahhhahaha',
+        age: 25
+      }
+    }
+  });
+  </script>
+</body>
+
+</html>
