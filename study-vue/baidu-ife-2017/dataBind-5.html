@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+</head>
+
+<body>
+  <!-- 页面中原本的 html 模板片段 -->
+  <div id="app">
+    <p>姓名：{{user.name}}</p>
+    <p>年龄：{{user.age}}</p>
+  </div>
+  <script>
+  function findAllNode(node, vm) {
+    for (var i = 0; i < node.children.length; i++) {
+      var thisNode = node.children[i];
+      if (thisNode.children.length) {
+        findAllNode(thisNode, vm)
+      } else {
+        compile(thisNode, vm)
+      }
+    }
+  }
+
+  function compile(node, vm) {
+    var reg = /\{\{(.*)\}\}/g;
+    if (reg.test(node.innerText)) {
+      var keyArr = RegExp.$1.split(".");
+      var data = vm.data;
+      keyArr.forEach(function(key) {
+        data = data[key];
+      })
+      node.innerText = node.innerText.replace(reg, data);
+      vm.Observer.$watch(keyArr[keyArr.length - 1], function(oldVal,newVal) {
+        node.innerText = node.innerText.replace(oldVal, newVal);
+      })
+    }
+  }
+
+  function Vue(options) {
+    this.data = options.data;
+    this.el = options.el;
+    this.events = {};
+    this.Observer = new Observer(this.data);
+    findAllNode(document.querySelector(this.el), this)
+    return this.Observer;
+  }
+
+  /**
+   * Observer 观察data,监听其属性的读取与变化
+   */
+  function Observer(data, events, parent) {
+    this.data = data; //存下当前data
+    this.events = events || {}; //存下所有事件
+    this.parent = parent; // 如果深层，存下上一级的key
+    this.defineAllData(data, this.events);
+  }
+
+
+  /**
+   * 递归修改属性
+   */
+  Observer.prototype.defineAllData = function(obj, events) {
+      for (var key in obj) {
+        if (obj.hasOwnProperty(key)) { //可枚举属性
+          if (typeof obj[key] === 'object') { //这个key是obj，递归，往key加get、set
+            new Observer(obj[key], events, key);
+          }
+          this.defineGetSet(key, obj[key], events); //对该obj的key加set、set
+        }
+      }
+    }
+    /**
+     * 修改属性加get、set，监听其属性的读取与变化
+     */
+  Observer.prototype.defineGetSet = function(key, val, events) {
+    var self = this;
+    Object.defineProperty(this.data, key, {
+      enumerable: true,
+      configurable: true,
+      get: function() {
+        console.log('你访问了', key);
+        return val;
+      },
+      set: function(newVal) {
+        console.log('你设置了', key, ',新的值为', newVal);
+        if (newVal !== val) {
+
+          var parent = self.parent;
+          while (parent) { // 循环寻找上级触发事件
+            self.$emit(parent, newVal);
+            parent = parent.parent;
+          }
+          self.$emit(key, val, newVal); //触发当前key事件
+          val = newVal;
+        }
+        Observer.tempArr = [];
+        if (typeof newVal === 'object') { //这个key是obj，递归，往key加get、set
+          return new Observer(newVal, events, key);
+        }
+      }
+    })
+  }
+
+  /**
+   * watch key放入事件数组
+   */
+  Observer.prototype.$watch = function(key, listener) {
+    if (!this.events[key]) {
+      this.events[key] = [];
+    }
+    this.events[key].push(listener);
+  }
+
+  /**
+   * emit 触发事件
+   */
+  Observer.prototype.$emit = function() {
+    var key = [].shift.call(arguments);
+    var data = [].slice.call(arguments);
+    var self = this;
+    if (!this.events[key] || this.events[key].length < 1) {
+      return;
+    }
+    this.events[key].forEach(function(listener) {
+      listener.apply(self, data);
+    })
+  }
+  var app = new Vue({
+    el: '#app',
+    data: {
+      user: {
+        name: 'hahhhahaha',
+        age: 25
+      }
+    }
+  });
+  /**
+   * test
+   */
+  app.data.user.name = "233333";
+  app.data.user.age = "100";
+  </script>
+</body>
+
+</html>
