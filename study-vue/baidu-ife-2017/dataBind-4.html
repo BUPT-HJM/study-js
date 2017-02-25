@@ -32,7 +32,7 @@
       keyArr.forEach(function(key) {
         data = data[key];
       })
-      node.innerText = data;
+      node.innerText = node.innerText.replace(reg, data);
     }
   }
 
