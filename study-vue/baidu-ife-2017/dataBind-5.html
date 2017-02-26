@@ -9,9 +9,15 @@
 <body>
   <!-- 页面中原本的 html 模板片段 -->
   <div id="app">
+    <p>简单的双向绑定实现</p>
     <input type="text" v-model="user.name">
     <p>姓名：{{user.name}}</p>
     <p>年龄：{{user.age}}</p>
+    <p>console控制台复制以下代码执行</p>
+    <textarea name="" id="" cols="50" rows="10">
+      app.data.user.name = "12345";
+      app.data.user.age = 67;
+    </textarea>
   </div>
   <script>
   function findAllNode(node, vm) {
