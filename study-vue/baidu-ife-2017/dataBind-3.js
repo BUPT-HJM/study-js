@@ -1,10 +1,11 @@
 /**
  * Observer 观察data,监听其属性的读取与变化
  */
-function Observer(data, events, parent) {
+function Observer(data, events, parent, parentKey) {
   this.data = data; //存下当前data
   this.events = events || {}; //存下所有事件
-  this.parent = parent; // 如果深层，存下上一级的key
+  this.parent = parent || {}; // 如果深层，存下上一级Observer
+  this.parentKey = parentKey || ''; // 如果深层，存下上一级的key
   this.defineAllData(data, this.events);
 }
 
@@ -13,18 +14,18 @@ function Observer(data, events, parent) {
  * 递归修改属性
  */
 Observer.prototype.defineAllData = function(obj, events) {
-  for (var key in obj) {
-    if (obj.hasOwnProperty(key)) { //可枚举属性
-      if (typeof obj[key] === 'object') { //这个key是obj，递归，往key加get、set
-        new Observer(obj[key], events, key);
+    for (var key in obj) {
+      if (obj.hasOwnProperty(key)) { //可枚举属性
+        if (typeof obj[key] === 'object') { //这个key是obj，递归，往key加get、set
+          new Observer(obj[key], events, this, key);
+        }
+        this.defineGetSet(key, obj[key], events); //对该obj的key加set、set
       }
-      this.defineGetSet(key, obj[key], events); //对该obj的key加set、set
     }
   }
-}
-/**
- * 修改属性加get、set，监听其属性的读取与变化
- */
+  /**
+   * 修改属性加get、set，监听其属性的读取与变化
+   */
 Observer.prototype.defineGetSet = function(key, val, events) {
   var self = this;
   Object.defineProperty(this.data, key, {
@@ -39,15 +40,17 @@ Observer.prototype.defineGetSet = function(key, val, events) {
       if (newVal !== val) {
         val = newVal;
         var parent = self.parent;
-        while(parent) { // 循环寻找上级触发事件
-          self.$emit(parent, newVal);
+        var parentKey = self.parentKey;
+        while (parent) { // 循环寻找上级触发事件
+          var currentParent = parent;
+          self.$emit(parentKey, newVal);
+          parentKey = parent.parentKey;
           parent = parent.parent;
         }
         self.$emit(key, newVal); //触发当前key事件
       }
-      Observer.tempArr = [];
       if (typeof newVal === 'object') { //这个key是obj，递归，往key加get、set
-        return new Observer(newVal, events, key);
+        return new Observer(newVal, events, this, key);
       }
     }
   })
@@ -89,13 +92,26 @@ Observer.prototype.$emit = function() {
 let app2 = new Observer({
   name: {
     firstName: 'shaofeng',
-    lastName: 'liang'
+    lastName: 'liang',
+    b: {
+      c: {
+        d: {
+          e: {
+            f: {
+              g: {
+                h: 1
+              }
+            }
+          }
+        }
+      }
+    }
   },
   age: 25
 });
 
 app2.$watch('name', function(newName) {
-  console.log('我的姓名发生了变化，可能是姓氏变了，也可能是名字变了。')
+  console.log('我的姓名发生了变化，可能是姓氏变了，也可能是名字变了,有可能深层的东西变了。')
 });
 app2.$watch('firstName', function(newName) {
   console.log('名字变了。')
@@ -103,7 +119,15 @@ app2.$watch('firstName', function(newName) {
 app2.$watch('lastName', function(newName) {
   console.log('姓氏变了。')
 });
+app2.$watch('c', function(newName) {
+  console.log('c变了。')
+});
+app2.$watch('b', function(newName) {
+  console.log('b变了。')
+});
 app2.data.name.firstName = 'hahaha';
 // 输出：我的姓名发生了变化，可能是姓氏变了，也可能是名字变了。
 app2.data.name.lastName = 'blablabla';
 // 输出：我的姓名发生了变化，可能是姓氏变了，也可能是名字变了。
+app2.data.name.b.c.d.e.f.g.h = 'blablabla';
+//app2.data.name.firstName = 'blablabla';

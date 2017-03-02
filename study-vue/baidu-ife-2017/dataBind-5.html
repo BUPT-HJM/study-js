@@ -80,10 +80,11 @@
   /**
    * Observer 观察data,监听其属性的读取与变化
    */
-  function Observer(data, events, parent) {
+  function Observer(data, events, parent, parentKey) {
     this.data = data; //存下当前data
     this.events = events || {}; //存下所有事件
-    this.parent = parent; // 如果深层，存下上一级的key
+    this.parent = parent || {}; // 如果深层，存下上一级Observer
+    this.parentKey = parentKey || ''; // 如果深层，存下上一级的key
     this.defineAllData(data, this.events);
   }
 
@@ -95,7 +96,7 @@
       for (var key in obj) {
         if (obj.hasOwnProperty(key)) { //可枚举属性
           if (typeof obj[key] === 'object') { //这个key是obj，递归，往key加get、set
-            new Observer(obj[key], events, key);
+            new Observer(obj[key], events, this, key);
           }
           this.defineGetSet(key, obj[key], events); //对该obj的key加set、set
         }
@@ -116,18 +117,19 @@
       set: function(newVal) {
         console.log('你设置了', key, ',新的值为', newVal);
         if (newVal !== val) {
-
+          val = newVal;
           var parent = self.parent;
+          var parentKey = self.parentKey;
           while (parent) { // 循环寻找上级触发事件
-            self.$emit(parent, newVal);
+            var currentParent = parent;
+            self.$emit(parentKey, val, newVal);
+            parentKey = parent.parentKey;
             parent = parent.parent;
           }
           self.$emit(key, val, newVal); //触发当前key事件
-          val = newVal;
         }
-        Observer.tempArr = [];
         if (typeof newVal === 'object') { //这个key是obj，递归，往key加get、set
-          return new Observer(newVal, events, key);
+          return new Observer(newVal, events, this, key);
         }
       }
     })
