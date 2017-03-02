@@ -42,7 +42,6 @@ Observer.prototype.defineGetSet = function(key, val, events) {
         var parent = self.parent;
         var parentKey = self.parentKey;
         while (parent) { // 循环寻找上级触发事件
-          var currentParent = parent;
           self.$emit(parentKey, newVal);
           parentKey = parent.parentKey;
           parent = parent.parent;

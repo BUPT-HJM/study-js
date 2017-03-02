@@ -121,7 +121,6 @@
           var parent = self.parent;
           var parentKey = self.parentKey;
           while (parent) { // 循环寻找上级触发事件
-            var currentParent = parent;
             self.$emit(parentKey, val, newVal);
             parentKey = parent.parentKey;
             parent = parent.parent;
