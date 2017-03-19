@@ -1,0 +1,25 @@
+{
+  "name": "study-js",
+  "version": "1.0.0",
+  "description": "study-js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BUPT-HJM/study-js.git"
+  },
+  "author": "huangjunming",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BUPT-HJM/study-js/issues"
+  },
+  "homepage": "https://github.com/BUPT-HJM/study-js#readme",
+  "dependencies": {
+    "cheerio": "^0.22.0",
+    "concat-stream": "^1.6.0",
+    "express": "^4.15.2",
+    "request": "^2.81.0"
+  }
+}
