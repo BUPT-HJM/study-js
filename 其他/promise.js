@@ -69,28 +69,27 @@ function MyPromise(fn) {
 
 
 
-function getName() {
+function getID() {
   return new MyPromise(function(resolve, reject) {
-    console.log("get name...");
+    console.log("get id...");
+    setTimeout(function() {
+      resolve("666");
+    }, 1000);
+  })
+}
+
+function getNameByID(id) {
+  return new MyPromise(function(resolve, reject) {
+	  console.log(id);
+    console.log("get name...")
     setTimeout(function() {
       resolve("hjm");
     }, 1000);
   })
 }
 
-function getName2() {
-  return new MyPromise(function(resolve, reject) {
-    console.log("get name2...");
-    setTimeout(function() {
-      reject("error");
-    }, 1000);
-  })
-}
 
-
-getName().then(function(name) {
-  console.log(name);
-}).then(getName2).then(function(name) {
+getID().then(getNameByID).then(function(name) {
   console.log(name);
 }, function(err) {
   console.log(err);
