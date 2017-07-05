@@ -20,8 +20,7 @@ console.log(Object.create(a))
 function deepClone(initialObj, finalObj) {
   var obj = finalObj || {};
   for (var i in initialObj) {
-    if (initialObj[i] === a) {
-      obj[i] = a;
+    if (initialObj[i] === obj[i]) {
       continue;
     }
     if (typeof initialObj[i] === "object") {
