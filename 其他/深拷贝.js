@@ -37,3 +37,20 @@ c.b.num = 5;
 console.log(c);
 console.log(a);
 
+// 考虑其他对象的深拷贝
+// Object.prototype.toString.call(xxx)
+// 
+// Number / Boolean / String
+// => this.valueOf()
+// 
+// Date
+// => new Date(this.valueOf)
+// 
+// RegExp
+// var pattern = this.valueOf();
+// flags += pattern.global ? 'g' : '';
+// flags += pattern.ignoreCase ? 'i' : '';
+// flags += pattern.multiline ? 'm' : '';
+// => new RegExp(pattern.source, flags);
+
+
