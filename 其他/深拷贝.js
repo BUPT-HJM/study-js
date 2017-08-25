@@ -1,31 +1,27 @@
-// 尚未解决循环引用问题
 var a = {
   arr: [1, 2, 3],
-  num: 5
+  num: 5,
 }
-var b = {
-    a: a
-  }
-  // a.b = a;
 
 console.log(JSON.parse(JSON.stringify(a)))
 
-a.b = b;
+a.b = a;
 
-console.log(Object.create(a))
-
-
-// 还未解决好循环引用的问题
-
-function deepClone(initialObj, finalObj) {
+function deepClone(initialObj, finalObj, srcStack, copyStack) {
   var obj = finalObj || {};
+  var sStack = srcStack || [];
+  var cStack = copyStack || [];
   for (var i in initialObj) {
-    if (initialObj[i] === obj[i]) {
-      continue;
-    }
     if (typeof initialObj[i] === "object") {
-      obj[i] = (initialObj[i].constructor === Array) ? [] : {};
-      deepClone(initialObj[i], obj[i]);
+      var index = sStack.indexOf(initialObj[i]);
+      if (index !== -1) {
+        obj[i] = cStack[index];
+      } else {
+        sStack.push(initialObj[i]);
+        obj[i] = (initialObj[i].constructor === Array) ? [] : {};
+        cStack.push(obj[i]);
+        deepClone(initialObj[i], obj[i], sStack, cStack);
+      }                                           
     } else {
       obj[i] = initialObj[i]
     }
@@ -33,5 +29,11 @@ function deepClone(initialObj, finalObj) {
   return obj;
 }
 
+// 测试deepClone是否解决环对象
+var c = deepClone(a);
+c.num = 3;
+c.b.arr.push(4);
+c.b.num = 5;
+console.log(c);
+console.log(a);
 
-console.log(deepClone(a))
