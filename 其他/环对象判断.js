@@ -55,6 +55,7 @@ c.d = c.arr;
 d.e = d;
 console.log(isCircularObj(b));
 console.log(isCircularObj(c));
+// 引用父对象为环
 console.log(isCircularObj(d));
 
 
