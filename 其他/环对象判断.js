@@ -19,21 +19,42 @@ console.log(a);
 console.log(isCircularObjEasyFn(a));
 
 function isCircularObj(obj, stack = []) {
+    if (stack.indexOf(obj) > -1) {
+        return true;
+    }
+    stack.push(obj);
     for (let key in obj) {
-        if (typeof obj === 'object' && obj.hasOwnProperty(key)) {
-            let curObj = obj[key];
-            if (stack.indexOf(curObj) !== -1) {
-                return true;
-            }
-            stack.push(curObj);
-            if (!isCircularObj(curObj, stack)) {
-                return true;
+        if (obj.hasOwnProperty(key)) {
+            let value = obj[key];
+            if (typeof value === 'object') {
+                if (stack.indexOf(value) > -1) {
+                    return true;
+                }
+                stack.push(value);
+                if (!isCircularObj(value, stack)) {
+                    return true;
+                } else {
+                    stack.pop();
+                }
             }
         }
     }
+    stack.pop();
     return false;
 }
-console.log(a);
-console.log(isCircularObj(a));
+var b = {
+    arr: [1, 2],
+}
+var c = {
+    arr: [1, 2],
+}
+var d = {
+    arr: [1, 2],
+}
+c.d = c.arr;
+d.e = d;
+console.log(isCircularObj(b));
+console.log(isCircularObj(c));
+console.log(isCircularObj(d));
 
 
