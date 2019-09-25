@@ -2,7 +2,7 @@
 
 
 // 循环方式
-function binarySearch(arr, findVal) {
+function binarySearch (arr, findVal) {
   var low = 0;
   var high = arr.length - 1;
   var mid;
@@ -25,7 +25,7 @@ console.log(binarySearch([1, 2, 3, 4, 5], 6))
 
 
 //递归方式
-function binarySearch2(arr, findVal, left, right) {
+function binarySearch2 (arr, findVal, left, right) {
   left = left || 0;
   right = right || arr.length - 1;
   if (left >= right) {
